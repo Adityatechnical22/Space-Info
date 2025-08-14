@@ -1,0 +1,45 @@
+/* Reset */
+*{margin:0;padding:0;box-sizing:border-box}
+
+body,html{height:100%;background:#000;color:#fff;font-family:system-ui, sans-serif;overflow:hidden}
+
+#universe{
+  perspective:1500px;
+  width:100vw;
+  height:100vh;
+  position:relative;
+}
+
+#galaxy{
+  position:absolute;
+  top:50%;left:50%;
+  width:1px;height:1px;
+  transform-style:preserve-3d;
+  transform:translate(-50%,-50%) scale(0.2);
+  will-change:transform;
+  transition:transform .3s cubic-bezier(.25,.8,.25,1);
+}
+
+.star{
+  position:absolute;
+  width:2px;height:2px;
+  background:#fff;
+  border-radius:50%;
+  box-shadow:0 0 8px 1px #fff;
+  pointer-events:none;
+}
+
+.star[data-name]:hover::after{
+  content:attr(data-name);
+  position:absolute;
+  white-space:nowrap;
+  top:-20px;left:50%;
+  transform:translateX(-50%);
+  background:#0009;
+  padding:2px 6px;
+  border-radius:4px;
+  font-size:12px;
+  pointer-events:none;
+}
+
+#info{position:fixed;bottom:20px;left:20px;font-size:14px;opacity:.4}
