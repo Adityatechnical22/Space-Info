@@ -1,22 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>10 000 Stars – Clone</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<title>10 000 Stars – Fixed Clone</title>
+<style>
+  /* Reset */
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#000;color:#fff;font-family:system-ui,sans-serif;overflow:hidden}
+
+  #universe{
+    perspective:1500px;
+    width:100vw;height:100vh;
+    position:relative;
+  }
+  #galaxy{
+    position:absolute;top:50%;left:50%;
+    width:1px;height:1px;
+    transform-style:preserve-3d;
+    transform:translate(-50%,-50%) scale(0.2);
+    will-change:transform;
+    transition:transform .3s cubic-bezier(.25,.8,.25,1);
+  }
+
+  .star{
+    position:absolute;
+    width:2px;height:2px;
+    background:#fff;
+    border-radius:50%;
+    box-shadow:0 0 6px 1px #fff;
+    cursor:pointer;
+  }
+
+  .star::after{
+    content:attr(data-name);
+    position:absolute;
+    top:-22px;left:50%;
+    transform:translateX(-50%);
+    background:#0009;
+    color:#fff;
+    padding:3px 6px;
+    border-radius:3px;
+    font-size:11px;
+    white-space:nowrap;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity .2s;
+  }
+  .star:hover::after{opacity:1}
+
+  #info{
+    position:fixed;
+    bottom:15px;left:15px;
+    font-size:13px;
+    opacity:.4;
+  }
+</style>
 </head>
 <body>
-  <div id="universe">
-    <div id="galaxy">
-      <!-- Stars will be injected by JS -->
-    </div>
-  </div>
 
-  <div id="info">
-    <h1>10 000 Stars</h1>
-    <p>Scroll to zoom • Move mouse to look around</p>
-  </div>
+<div id="universe">
+  <div id="galaxy"></div>
+</div>
 
-  <script src="script.js"></script>
+<div id="info">
+  Scroll to zoom • Move mouse to look around
+</div>
+
+<script>
+  /* ---------- CONFIG ---------- */
+  const STAR_COUNT   = 1000;
+  const MAX_DEPTH    = 2000;
+  const GALAXY_SIZE  = 4000;
+  const STAR_NAMES = [
+    "Sol","Proxima Centauri","Alpha Centauri A","Alpha Centauri B","Barnard's Star",
+    "Wolf 359","Lalande 21185","Sirius A","Sirius B","BL Ceti","UV Ceti","Ross 154",
+    "Ross 248","Epsilon Eridani","Lacaille 9352","Ross 128","EZ Aquarii A","61 Cygni A",
+    "61 Cygni B","Procyon A","Procyon B","Struve 2398 A","Struve 2398 B","Groombridge 34 A",
+    "Groombridge 34 B","DX Cancri","Tau Ceti","Epsilon Indi","Gliese 1061","YZ Ceti"
+  ];
+
+  /* ---------- HELPERS ---------- */
+  const rand = (min,max)=>Math.random()*(max-min)+min;
+  const galaxy = document.getElementById('galaxy');
+
+  /* ---------- CREATE STARS ---------- */
+  for(let i=0;i<STAR_COUNT;i++){
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.dataset.name = STAR_NAMES[i % STAR_NAMES.length];
+
+    const x = rand(-GALAXY_SIZE/2, GALAXY_SIZE/2);
+    const y = rand(-GALAXY_SIZE/2, GALAXY_SIZE/2);
+    const z = rand(-MAX_DEPTH, MAX_DEPTH);
+
+    star.style.transform = `translate3d(${x}px,${y}px,${z}px)`;
+
+    const size = Math.max(.5, 4 - Math.abs(z)/400);
+    star.style.width = star.style.height = `${size}px`;
+
+    galaxy.appendChild(star);
+  }
+
+  /* ---------- MOUSE PARALLAX ---------- */
+  let rotX=0, rotY=0, currentScale=0.2;
+  const updateTransform = () => {
+    galaxy.style.transform = `translate(-50%,-50%) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(${currentScale})`;
+  };
+  document.addEventListener('mousemove', e=>{
+    const normX = (e.clientX / innerWidth  - 0.5) * 2;
+    const normY = (e.clientY / innerHeight - 0.5) * 2;
+    rotY =  normX * 15;
+    rotX = -normY * 15;
+    updateTransform();
+  });
+
+  /* ---------- SCROLL ZOOM ---------- */
+  window.addEventListener('wheel', e=>{
+    e.preventDefault();
+    currentScale = Math.max(0.05, Math.min(5, currentScale - e.deltaY * 0.001));
+    updateTransform();
+  },{passive:false});
+</script>
+
 </body>
 </html>
